@@ -45,6 +45,9 @@ Helm helps templatize the YAML files needed for the service monitors. We need to
 
 ### Starting off
 1. Inside your terminal, type: **helm init**
+2. Create custom namespaces, such as ("test", "test2")
+3. Deploy services inside the custom namespaces
+4. Follow this guide [https://github.com/colinjianingxie/ServiceMonitoring] for example services used in this tutorial.
 
 ### Creating the helm chart
 **Note: This repo will contain a mychart template for ease of access.**
