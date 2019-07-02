@@ -278,11 +278,15 @@ Congratulations! Now you should have an automatic service monitor generator.
 
 ### Helm Cheatsheet
 Make sure helm is initialized by running: **helm init**
+
 To show list of releases in helm: **helm list**
+
 To upgrade a helm release: **helm upgrade (release) (chart name) -f (overrides file)**
 - example: helm upgrade testchart mychart -f sample_overrides.yaml
+
 To install a helm chart: **helm install -n (release) --namespace = (insert namespace) (chart name) -f (sample overrides file)**
 - example: helm install -n testchart mychart -f sample_overrides.yaml
+
 To delete a helm chart: **helm delete (release) --purge**
 
 Things to note about the commands:
