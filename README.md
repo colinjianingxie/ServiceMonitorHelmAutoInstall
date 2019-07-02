@@ -79,6 +79,8 @@ By having only the **servicemonitor.yaml** file inside the templates folder, the
 **Note: Source code for this python script is located inside the repo as well as an example overrides yaml file.**
 
 1. Copy/Paste or Download the **service_monitor_overrides_generator.py** locally:
+**Note:** I suggest saving the python file in the same directory as the mychart template.
+
 ```python
 import os
 import yaml
@@ -186,8 +188,15 @@ spec:
       app: example-temp-2
 ```
 
-### Building the helm chart onto your kubernetes cluster.
+### Deplying the helm chart
 Now, we need to officialize the helm chart and deploy it onto the kubernetes cluster.
 
+1. Make sure the **mychart** template is in the same directory as the **service_monitor_overrides_generator.py** and the **service_monitor_overrides.yaml** 
+So, the directory should have:
+- ../mychart
+- ../service_monitor_overrides.yaml
+- ../service_monitor_overrides_generator.py
+
+2. 
 
 
