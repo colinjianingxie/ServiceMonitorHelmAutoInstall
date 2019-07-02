@@ -1,0 +1,8 @@
+service_monitor:
+    service_data:
+    -   port_type: web
+        service_name: example-temp
+        service_namespace: app-ns-1234
+    -   port_type: web
+        service_name: example-temp-2
+        service_namespace: app-ns-4321
