@@ -197,6 +197,99 @@ So, the directory should have:
 - ../service_monitor_overrides.yaml
 - ../service_monitor_overrides_generator.py
 
-2. 
+2. Run: **helm install -n testchart mychart -f service_monitor_overrides.yaml**
+- this should create the service monitors. 
 
 
+## Step 3: Automatic generating service monitors
+To automatically generate service monitors, we will be using a python script that will check for service changes in the namespaces and will run through the whole process autonomously. 
+
+### auto.py
+Save this python file in the same directory as **mychart** and the **service_monitor_overrides_generator.py** file:
+
+```python
+import os
+import time
+from kubernetes import client, config
+
+starttime=time.time()
+baseTime = 5.0
+
+def get_ns_svc_list(kube_client):
+	ns_svc_list = []
+	for ns in kube_client.list_namespace().items:
+		temp_ns = ns.metadata.name # Returns the namespace
+		if "app-ns" in temp_ns:
+			for svc in kube_client.list_namespaced_service(temp_ns).items:
+				temp_service_name = svc.metadata.name # Returns the service name
+				temp_pair = (temp_ns, temp_service_name) # Puts (namespace, service) as tuple
+				ns_svc_list.append(temp_pair)
+				#NEED TO COMAPRE VS DICTS
+	return ns_svc_list
+def main():
+
+	print("Starting....")
+	print("Current refresh rate is: " + str(baseTime) + "s")
+	print(""
+
+		)
+	#CONNECTING TO MINIKUBE
+	kube_config = os.getenv('KUBE_CONFIG')
+	context = os.getenv('CONTEXT')
+
+	proxy_url = os.getenv('HTTP_PROXY', None)
+	config.load_kube_config(config_file=kube_config,
+	                        context=context)
+	if proxy_url:
+	    logging.warning("Setting proxy: {}".format(proxy_url))
+	    client.Configuration._default.proxy = proxy_url
+
+	#ACCESSING THE API
+	kubernetes_client = client.CoreV1Api()
+	v1 = client.CoreV1Api()
+
+	# RUN THIS ONCE
+	base_service_list = get_ns_svc_list(kubernetes_client)
+	while True:
+		new_service_list = get_ns_svc_list(kubernetes_client)
+
+		if(new_service_list != base_service_list):
+			base_service_list = new_service_list
+			print("Running overrides yaml generator")
+			os.system("python3 service_monitor_overrides_generator.py")
+			print("--------------------------------------------------")
+			os.system("helm upgrade testchart mychart -f service_monitor_overrides.yaml")
+			print("--------------------------------------------------")
+			print("Finished updating helm chart")
+		time.sleep(baseTime - ((time.time() - starttime) % baseTime))
+
+main()
+```
+
+### Running the Service Monitor Auto Generator
+1. Navigate to the **auto.py** script in the terminal
+2. Run: **python3 auto.py**
+3. Open another terminal window, and type: **kubectl create ns test-6543**
+4. Deploy a sample service into that namespace by typing: **kubectl -n test-6543 apply -f (insert path to sample service yaml file)**
+
+
+## Finishing Up
+Congratulations! Now you should have an automatic service monitor generator. 
+
+### Helm Cheatsheet
+Make sure helm is initialized by running: **helm init**
+To show list of releases in helm:
+- helm list
+To upgrade a helm release:
+- helm upgrade (release) (chart name) -f (overrides file)
+- example: helm upgrade testchart mychart -f sample_overrides.yaml
+To install a helm chart:
+- helm install -n (release) --namespace = (insert namespace) (chart name) -f (sample overrides file)
+- example: helm install -n testchart mychart -f sample_overrides.yaml
+To delete a helm chart:
+- helm delete (release) --purge
+
+Things to note about the commands:
+- If release isn't specificed, helm will automatically create a default name
+- If namespace isn't specified, helm will install in the default namespace
+- If an overrides file isn't specified, helm will read off of the values.yaml file
