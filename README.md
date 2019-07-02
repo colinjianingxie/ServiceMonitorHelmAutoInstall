@@ -49,5 +49,26 @@ Helm helps templatize the YAML files needed for the service monitors. We need to
 **Note: This repo will contain a mychart template for ease of access.**
 1. Inside your terminal, type: **helm create mychart**. This will create a helm chart called "mychart". You can name it whatever you want, but for this tutorial, we will be calling the chart "mychart" for consistency.
 2. Navigate to the **/mychart/templates** folder that was created. 
-3. Inside the folder, delete every file. We will be putting a general 
+3. Inside the folder, delete every file. We will be putting a general **servicemonitor.yaml** file inside as follows:
 
+```
+{{ $service_data := .Values.service_monitor.service_data }}
+{{ range $service_pair := $service_data }}
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    team: whatever
+  name: {{ $service_pair.service_namespace }}-{{ $service_pair.service_name }}-monitor
+  namespace: {{ $service_pair.service_namespace }}
+spec:
+  endpoints:
+  - port: {{ $service_pair.port_type }}
+  selector:
+    matchLabels:
+      app: {{ $service_pair.service_name }}
+{{ end }}
+```
+
+4. We will later be reading off of a 
