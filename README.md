@@ -40,7 +40,7 @@ spec:
   enableAdminAPI: false
 ```
 
-## Step 2: Helm
+## Step 2: Helm Install
 Helm helps templatize the YAML files needed for the service monitors. We need to install a service monitor for every service within a namespace, so it makes sense to have a single template Service Monitor helm chart that takes in multiple values for the deployments.
 
 ### Starting off
@@ -76,7 +76,7 @@ By having only the **servicemonitor.yaml** file inside the templates folder, the
 4. We will later be reading off of an overrides file that will fill in the variables, such as ($service_pair.service_name).
 
 ### Generating the Overrides file
-**Note: Source code for this python script is located inside the repo as well as an example overrides yaml file.
+**Note: Source code for this python script is located inside the repo as well as an example overrides yaml file.**
 
 1. Copy/Paste or Download the **service_monitor_overrides_generator.py** locally:
 ```python
@@ -137,5 +137,57 @@ main()
 3. Run: **kubectl proxy** so the python file can read off of the kubernetes cluster.
 4. Run: **python3 service_monitor_overrides_generator.py** to run the python file.
 5. Notice the **service_monitor_overrides.yaml** file that's generated.
+
+### How the overrides file connects with the helm template
+Here is an example overrides file (assuming you're looking at namespaces with "test" inside the name):
+
+```
+service_monitor:
+    service_data:
+    -   port_type: web
+        service_name: example-temp
+        service_namespace: test-1234
+    -   port_type: web
+        service_name: example-temp-2
+        service_namespace: test-4321
+```
+
+Essentially, there are two services that are being monitored, in the form of: (port type, service name, namespace) - (web, example-temp, test-1234) and (web, example-temp-2, test-4321). 
+
+Helm will read the overrides file and use the template **servicemonitor.yaml** template created and generate the *equivalent* service monitor yaml file:
+
+```
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    team: whatever
+  name: test-1234-example-temp-monitor
+  namespace: test-1234
+spec:
+  endpoints:
+  - port: web
+  selector:
+    matchLabels:
+      app: example-temp
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    team: whatever
+  name: test-4321-example-temp-2-monitor
+  namespace: test-4321
+spec:
+  endpoints:
+  - port: web
+  selector:
+    matchLabels:
+      app: example-temp-2
+```
+
+### Building the helm chart onto your kubernetes cluster.
+Now, we need to officialize the helm chart and deploy it onto the kubernetes cluster.
+
 
 
