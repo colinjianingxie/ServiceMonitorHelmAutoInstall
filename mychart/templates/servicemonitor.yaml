@@ -1,0 +1,17 @@
+{{ $service_data := .Values.service_monitor.service_data }}
+{{ range $service_pair := $service_data }}
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    team: whatever
+  name: {{ $service_pair.service_namespace }}-{{ $service_pair.service_name }}-monitor
+  namespace: {{ $service_pair.service_namespace }}
+spec:
+  endpoints:
+  - port: {{ $service_pair.port_type }}
+  selector:
+    matchLabels:
+      app: {{ $service_pair.service_name }}
+{{ end }}
