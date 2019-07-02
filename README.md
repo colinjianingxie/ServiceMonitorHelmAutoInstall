@@ -3,10 +3,11 @@
 This tutorial will show you how to automatically install service monitor helm charts if a service gets added or deleted. We will be using Minikube to run our kubernetes cluster. 
 
 ## Pre-requisites
-1. Basic knowledge of Kubernetes
-2. Minikube installed
+- Basic knowledge of Kubernetes
+- Minikube installed
+- Helm installed
 
-## Prometheus
+## Step 1: Prometheus
 Prometheus is a scraping tool that obtains metrics from various kubernetes objects. 
 ### Installation:
 1. Download the /Prometheus folder from this github repo.
@@ -37,3 +38,16 @@ spec:
       memory: 400Mi
   enableAdminAPI: false
 ```
+
+## Step 2: Helm
+Helm helps templatize the YAML files needed for the service monitors. We need to install a service monitor for every service within a namespace, so it makes sense to have a single template Service Monitor helm chart that takes in multiple values for the deployments.
+
+### Starting off
+1. Inside your terminal, type: **helm init**
+
+### Creating the helm chart
+**Note: This repo will contain a mychart template for ease of access.**
+1. Inside your terminal, type: **helm create mychart**. This will create a helm chart called "mychart". You can name it whatever you want, but for this tutorial, we will be calling the chart "mychart" for consistency.
+2. Navigate to the **/mychart/templates** folder that was created. 
+3. Inside the folder, delete every file. We will be putting a general 
+
